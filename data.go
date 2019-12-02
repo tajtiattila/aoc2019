@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
@@ -20,33 +21,34 @@ var (
 	IgnoreCache bool
 )
 
-func daydataInts(day int) (<-chan int, <-chan error) {
-	ch, cherr := make(chan int), make(chan error, 1)
-	go func() {
-		defer close(ch)
-		defer close(cherr)
-		rc, err := daydata(day)
-		if err != nil {
-			cherr <- err
-			return
-		}
+func daydataInts(day int) ([]int, error) {
+	rc, err := daydata(day)
+	if err != nil {
+		return nil, err
+	}
+	data, err := ioutil.ReadAll(rc)
+	if err != nil {
+		return nil, err
+	}
 
-		scanner := bufio.NewScanner(rc)
-		for scanner.Scan() {
-			t := strings.TrimSpace(scanner.Text())
-			if t == "" {
-				continue
-			}
-			n, err := strconv.Atoi(t)
-			if err != nil {
-				cherr <- err
-				return
-			}
-			ch <- n
+	s := string(data)
+	var sv []string
+	if strings.IndexByte(s, ',') > 0 {
+		sv = strings.Split(s, ",")
+	} else {
+		sv = strings.Fields(s)
+	}
+
+	var ints []int
+	for _, s := range sv {
+		n, err := strconv.Atoi(strings.TrimSpace(s))
+		if err != nil {
+			return nil, err
 		}
-		cherr <- scanner.Err()
-	}()
-	return ch, cherr
+		ints = append(ints, n)
+	}
+
+	return ints, nil
 }
 
 func daydata(day int) (io.ReadCloser, error) {

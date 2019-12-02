@@ -3,17 +3,18 @@ package main
 import "log"
 
 func day1() {
-	ch, cherr := daydataInts(1)
+	ints, err := daydataInts(1)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	sum1 := 0
 	sum2 := 0
-	for n := range ch {
+	for _, n := range ints {
 		sum1 += fuel(n)
 		sum2 += fuelx(n)
 	}
 
-	if err := <-cherr; err != nil {
-		log.Fatal(err)
-	}
 	log.Println("day1a:", sum1)
 	log.Println("day1b:", sum2)
 }
