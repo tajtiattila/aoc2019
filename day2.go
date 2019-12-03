@@ -5,19 +5,42 @@ import (
 	"log"
 )
 
+func copyrom(v []int) []int {
+	mem := make([]int, len(v))
+	copy(mem, v)
+	return mem
+}
+
 func day2() {
-	mem, err := daydataInts(2)
+	rom, err := daydataInts(2)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	mem := copyrom(rom)
 	mem[1] = 12
 	mem[2] = 2
 	_, _, err = Intcomp(mem, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("day2:", mem[0])
+	log.Println("day2a:", mem[0])
+
+	const expect = 19690720
+	for noun := 0; noun <= 99; noun++ {
+		for verb := 0; verb <= 99; verb++ {
+			mem := copyrom(rom)
+			mem[1] = noun
+			mem[2] = verb
+			_, _, err = Intcomp(mem, 0)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if expect == mem[0] {
+				log.Println("day2b:", noun*100+verb)
+			}
+		}
+	}
 }
 
 func Intcomp(v []int, pc int) ([]int, int, error) {
