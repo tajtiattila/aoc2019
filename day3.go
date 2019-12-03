@@ -15,10 +15,10 @@ func day3() {
 	}
 	defer rc.Close()
 
-	var wires [][]wiresegment
+	var wires []wire
 	scanner := bufio.NewScanner(rc)
 	for scanner.Scan() {
-		w, err := wire(0, 0, scanner.Text())
+		w, err := parsewire(0, 0, scanner.Text())
 		if err != nil {
 			log.Fatal("bad wire", scanner.Text(), err)
 		}
@@ -28,14 +28,21 @@ func day3() {
 		log.Fatal("scan error", err)
 	}
 
-	im := 0
-	for i := range get_intersections(wires[0], wires[1]) {
+	w0 := wires[0]
+	w1 := wires[1]
+	var im, id int
+	for i := range get_intersections(w0.s, w1.s) {
 		m := iabs(i.x) + iabs(i.y)
 		if m != 0 && (im == 0 || m < im) {
 			im = m
 		}
+		d := w0.d[i] + w1.d[i]
+		if d != 0 && (id == 0 || d < id) {
+			id = d
+		}
 	}
 	log.Println("day3a:", im)
+	log.Println("day3b:", id)
 }
 
 func iabs(i int) int {
@@ -122,13 +129,20 @@ func (a wiresegment) intersects(b wiresegment, ch chan<- point) {
 	}
 }
 
-func wire(x, y int, s string) ([]wiresegment, error) {
+type wire struct {
+	s []wiresegment // segments
+	d map[point]int // distance from source
+}
+
+func parsewire(x, y int, s string) (wire, error) {
 	parts := strings.Split(strings.TrimSpace(s), ",")
 
 	var w []wiresegment
+	m := make(map[point]int)
+	d := 0
 	for i, p := range parts {
 		if len(p) < 2 {
-			return nil, fmt.Errorf("invalid part %s at %d", p, i)
+			return wire{}, fmt.Errorf("invalid part %s at %d", p, i)
 		}
 		var dx, dy int
 		switch p[0] {
@@ -143,14 +157,20 @@ func wire(x, y int, s string) ([]wiresegment, error) {
 		}
 		l, err := strconv.Atoi(p[1:])
 		if err != nil {
-			return nil, fmt.Errorf("invalid part %s at %d", p, i)
+			return wire{}, fmt.Errorf("invalid part %s at %d", p, i)
 		}
 
 		sx, sy := x, y
-		x += l * dx
-		y += l * dy
+		for i := 0; i < l; i++ {
+			x += dx
+			y += dy
+			d++
+			if _, ok := m[pt(x, y)]; !ok {
+				m[pt(x, y)] = d
+			}
+		}
 		w = append(w, wireseg(sx, sy, x, y))
 	}
 
-	return w, nil
+	return wire{w, m}, nil
 }
