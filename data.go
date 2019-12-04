@@ -51,6 +51,26 @@ func daydataInts(day int) ([]int, error) {
 	return ints, nil
 }
 
+func mustdaydatastr(day int) string {
+	rc := mustdaydata(day)
+	defer rc.Close()
+
+	b, err := ioutil.ReadAll(rc)
+	if err != nil {
+		log.Fatal("error reading data:", err)
+	}
+
+	return string(b)
+}
+
+func mustdaydata(day int) io.ReadCloser {
+	rc, err := daydata(day)
+	if err != nil {
+		log.Fatal("error getting data:", err)
+	}
+	return rc
+}
+
 func daydata(day int) (io.ReadCloser, error) {
 	if !IgnoreCache {
 		r, err := os.Open(daydatafn(day))
@@ -151,4 +171,18 @@ func getdataclient() (*http.Client, error) {
 	j.SetCookies(u, cookies)
 
 	return &http.Client{Jar: j}, nil
+}
+
+func mustprocstr(s, sep string, nwant int, f func(string) error) {
+	parts := strings.Split(strings.TrimSpace(s), sep)
+	if len(parts) != nwant {
+		log.Fatal("error processing %.100q (sep %q), want %d parts, got %d",
+			nwant, len(parts))
+	}
+	for i, part := range parts {
+		if err := f(part); err != nil {
+			log.Fatal("error processing %.100q (sep %q) at %d: %v",
+				s, sep, i, err)
+		}
+	}
 }
