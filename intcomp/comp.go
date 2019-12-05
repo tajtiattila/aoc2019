@@ -19,6 +19,11 @@ const (
 	opInput  = 3
 	opOutput = 4
 
+	opJumpIfTrue  = 5
+	opJumpIfFalse = 6
+	opLessThan    = 7
+	opEquals      = 8
+
 	opHalt = 99
 )
 
@@ -43,7 +48,13 @@ func init() {
 		opMult:   fMult,
 		opInput:  fInput,
 		opOutput: fOutput,
-		opHalt:   fHalt,
+
+		opJumpIfTrue:  fJumpIfTrue,
+		opJumpIfFalse: fJumpIfFalse,
+		opLessThan:    fLessThan,
+		opEquals:      fEquals,
+
+		opHalt: fHalt,
 	} {
 		opm[inst] = f
 	}
@@ -145,6 +156,31 @@ func (h *oper) finish(n int) error {
 	return h.err
 }
 
+func (h *oper) jump(ic int) error {
+	if h.err != nil {
+		return h.err
+	}
+
+	if ic < 0 || ic >= len(h.c.Mem) {
+		return fmt.Errorf("Invalid jump %d to %d at %d", h.inst, ic, h.c.IC)
+	}
+
+	h.c.IC = ic
+	return nil
+}
+
+func (h *oper) cond_jump(leninst int, cond bool, ic int) error {
+	if h.err != nil {
+		return h.err
+	}
+
+	if cond {
+		return h.jump(ic)
+	}
+
+	return h.finish(leninst)
+}
+
 var decexp = []int{1, 10, 100, 1000, 10000, 100000}
 
 func digit(value, digit int) int {
@@ -156,17 +192,13 @@ func digit(value, digit int) int {
 
 func fAdd(c *Comp, inst int) error {
 	h := oper{c: c, inst: inst}
-
 	h.warg(3, h.rarg(1)+h.rarg(2))
-
 	return h.finish(4)
 }
 
 func fMult(c *Comp, inst int) error {
 	h := oper{c: c, inst: inst}
-
 	h.warg(3, h.rarg(1)*h.rarg(2))
-
 	return h.finish(4)
 }
 
@@ -194,6 +226,35 @@ func fOutput(c *Comp, inst int) error {
 	}
 
 	return h.finish(2)
+}
+
+func fJumpIfTrue(c *Comp, inst int) error {
+	h := oper{c: c, inst: inst}
+	return h.cond_jump(3, h.rarg(1) != 0, h.rarg(2))
+}
+
+func fJumpIfFalse(c *Comp, inst int) error {
+	h := oper{c: c, inst: inst}
+	return h.cond_jump(3, h.rarg(1) == 0, h.rarg(2))
+}
+
+func fLessThan(c *Comp, inst int) error {
+	h := oper{c: c, inst: inst}
+	h.warg(3, bool_int(h.rarg(1) < h.rarg(2)))
+	return h.finish(4)
+}
+
+func fEquals(c *Comp, inst int) error {
+	h := oper{c: c, inst: inst}
+	h.warg(3, bool_int(h.rarg(1) == h.rarg(2)))
+	return h.finish(4)
+}
+
+func bool_int(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 func fHalt(c *Comp, inst int) error {

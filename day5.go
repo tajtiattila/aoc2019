@@ -12,12 +12,17 @@ func day5() {
 		log.Fatal(err)
 	}
 
-	c := intcomp.Comp{
-		Mem:    copyrom(rom),
-		Input:  intcomp.FixedInput(1),
-		Output: intcomp.LogOutput("day5a"),
+	run := func(inp int, pfx string) {
+		c := intcomp.Comp{
+			Mem:    copyrom(rom),
+			Input:  intcomp.FixedInput(inp),
+			Output: intcomp.LogOutput(pfx),
+		}
+		if err := c.Run(); err != nil {
+			log.Fatal(err)
+		}
 	}
-	if err := c.Run(); err != nil {
-		log.Fatal(err)
-	}
+
+	run(1, "day5a")
+	run(5, "day5b")
 }
