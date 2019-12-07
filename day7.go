@@ -13,16 +13,31 @@ func day7() {
 		log.Fatal(err)
 	}
 
-	log.Println("day7a:", maxsig(rom))
+	log.Println("day7a:", maxsig(rom, false))
+	log.Println("day7b:", maxsig(rom, true))
 }
 
-func maxsig(rom []int) int {
+func maxsig(rom []int, feedback bool) int {
 	var rmax int
 	hasrmax := false
 
-	v := []int{0, 1, 2, 3, 4}
+	const nphase = 5
+	v := make([]int, nphase)
+	for i := range v {
+		if feedback {
+			v[i] = nphase + i
+		} else {
+			v[i] = i
+		}
+	}
+
 	for {
-		r := multiamp(rom, v)
+		var r int
+		if feedback {
+			r = run_feedbackloop_amp(rom, v)
+		} else {
+			r = runmultiamp(rom, v)
+		}
 		if !hasrmax || r > rmax {
 			rmax = r
 			hasrmax = true
@@ -35,29 +50,66 @@ func maxsig(rom []int) int {
 	return rmax
 }
 
-func multiamp(rom []int, phase []int) int {
+func runmultiamp(rom []int, phase []int) int {
 	if len(phase) == 0 {
 		return 0
 	}
 
-	var ch <-chan int
-	for i, ph := range phase {
-		var in intcomp.IntReader
-		if i == 0 {
-			in = intcomp.FixedInput(ph, 0)
-		} else {
-			in = intcomp.MultiReader(intcomp.FixedInput(ph), &chanInput{ch})
-		}
-		ch = amp(rom, in)
-	}
+	chin, chout := multiamp(rom, phase, nil)
 
-	return <-ch
+	chin <- 0
+
+	return <-chout
 }
 
-func amp(rom []int, in intcomp.IntReader) <-chan int {
+func run_feedbackloop_amp(rom []int, phase []int) int {
+	if len(phase) == 0 {
+		return 0
+	}
+
+	chdone := make(chan struct{}, len(phase))
+	chin, chout := multiamp(rom, phase, chdone)
+
+	v := 0
+
+Loop:
+	for {
+		select {
+		case chin <- v:
+			v = <-chout
+		case <-chdone:
+			break Loop
+		}
+	}
+
+	return v
+}
+
+func multiamp(rom []int, phase []int, chdone chan<- struct{}) (chin chan<- int, chout <-chan int) {
+	chstart := make(chan int)
+	var ch <-chan int
+	ch = chstart
+	for _, ph := range phase {
+		ch = amp(rom,
+			intcomp.MultiReader(
+				intcomp.FixedInput(ph),
+				&chanInput{ch},
+			),
+			chdone)
+	}
+
+	return chstart, ch
+}
+
+func amp(rom []int, in intcomp.IntReader, chdone chan<- struct{}) <-chan int {
 	chout := make(chan int)
 	go func() {
 		defer close(chout)
+		if chdone != nil {
+			defer func() {
+				chdone <- struct{}{}
+			}()
+		}
 		c := intcomp.New(rom, in, &chanOutput{chout})
 		if err := c.Run(); err != nil {
 			log.Fatal(err)
