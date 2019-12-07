@@ -23,12 +23,32 @@ type fixedInput struct {
 }
 
 func (i *fixedInput) ReadInt() (int, error) {
-	if i.p <= len(i.v) {
+	if i.p < len(i.v) {
 		v := i.v[i.p]
 		i.p++
 		return v, nil
 	}
 	return 0, io.EOF
+}
+
+type multiReader struct {
+	v []IntReader
+	i int
+}
+
+func (r *multiReader) ReadInt() (int, error) {
+	for r.i < len(r.v) {
+		v, err := r.v[r.i].ReadInt()
+		if err != io.EOF {
+			return v, err
+		}
+		r.i++
+	}
+	return 0, io.EOF
+}
+
+func MultiReader(r ...IntReader) IntReader {
+	return &multiReader{v: r}
 }
 
 func LogOutput(prefix string) IntWriter {

@@ -11,6 +11,16 @@ type Comp struct {
 	IC int // instruction counter
 }
 
+func New(rom []int, in IntReader, out IntWriter) *Comp {
+	ram := make([]int, len(rom))
+	copy(ram, rom)
+	return &Comp{
+		Mem:    ram,
+		Input:  in,
+		Output: out,
+	}
+}
+
 // Opcodes
 const (
 	opAdd  = 1
@@ -203,6 +213,10 @@ func fMult(c *Comp, inst int) error {
 }
 
 func fInput(c *Comp, inst int) error {
+	if c.Input == nil {
+		return fmt.Errorf("Input is nil")
+	}
+
 	v, err := c.Input.ReadInt()
 	if err != nil {
 		return err
@@ -214,6 +228,10 @@ func fInput(c *Comp, inst int) error {
 }
 
 func fOutput(c *Comp, inst int) error {
+	if c.Output == nil {
+		return fmt.Errorf("Output is nil")
+	}
+
 	h := oper{c: c, inst: inst}
 	v := h.rarg(1)
 

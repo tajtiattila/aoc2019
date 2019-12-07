@@ -176,12 +176,12 @@ func getdataclient() (*http.Client, error) {
 func mustprocstr(s, sep string, nwant int, f func(string) error) {
 	parts := strings.Split(strings.TrimSpace(s), sep)
 	if len(parts) != nwant {
-		log.Fatal("error processing %.100q (sep %q), want %d parts, got %d",
-			nwant, len(parts))
+		log.Fatalf("error processing %.100q (sep %q), want %d parts, got %d",
+			s, sep, nwant, len(parts))
 	}
 	for i, part := range parts {
 		if err := f(part); err != nil {
-			log.Fatal("error processing %.100q (sep %q) at %d: %v",
+			log.Fatalf("error processing %.100q (sep %q) at %d: %v",
 				s, sep, i, err)
 		}
 	}

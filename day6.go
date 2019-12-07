@@ -14,7 +14,7 @@ func day6() {
 
 	m, err := parseOrbits(rc)
 	if err != nil {
-		log.Fatal("Parsing orbits: %v", err)
+		log.Fatal("Parsing orbits:", err)
 	}
 
 	na := 0
