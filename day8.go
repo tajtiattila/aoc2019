@@ -16,6 +16,12 @@ func day8() {
 		}
 	}
 	log.Println("day8a:", n12)
+
+	var m imagelayer
+	for _, layer := range im {
+		m.merge(layer)
+	}
+	log.Printf("day8b:\n%s", m)
 }
 
 type imagelayer struct {
@@ -29,6 +35,43 @@ func (l imagelayer) pixStat() map[byte]int {
 		m[d]++
 	}
 	return m
+}
+
+func (l *imagelayer) merge(x imagelayer) {
+	if l.pix == nil {
+		l.stride = x.stride
+		l.pix = make([]byte, len(x.pix))
+		copy(l.pix, x.pix)
+		return
+	}
+
+	for i := range l.pix {
+		if l.pix[i] == 2 {
+			l.pix[i] = x.pix[i]
+		}
+	}
+}
+
+func (l imagelayer) String() string {
+	var sb strings.Builder
+	for i, d := range l.pix {
+		var r rune
+		switch d {
+		case 0:
+			r = '░'
+		case 1:
+			r = '█'
+		case 2:
+			r = '-'
+		default:
+			r = '?'
+		}
+		sb.WriteRune(r)
+		if i%l.stride == l.stride-1 {
+			sb.WriteByte('\n')
+		}
+	}
+	return sb.String()
 }
 
 func spaceimage(s string, w, h int) []imagelayer {
