@@ -10,4 +10,5 @@ func day9() {
 	rom := mustdaydataInts(9)
 
 	log.Println("day9a:", intcomp.MustRun(rom, 1))
+	log.Println("day9b:", intcomp.MustRun(rom, 2))
 }
