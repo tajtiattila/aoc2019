@@ -9,6 +9,8 @@ type Comp struct {
 	Output IntWriter
 
 	IC int // instruction counter
+
+	RelBase int // relative addressing
 }
 
 func New(rom []int, in IntReader, out IntWriter) *Comp {
@@ -34,6 +36,8 @@ const (
 	opLessThan    = 7
 	opEquals      = 8
 
+	opRelShift = 9
+
 	opHalt = 99
 )
 
@@ -41,6 +45,7 @@ const (
 const (
 	modePosition  = 0
 	modeImmediate = 1
+	modeRelative  = 2
 )
 
 type opFunc func(c *Comp, inst int) error
@@ -63,6 +68,8 @@ func init() {
 		opJumpIfFalse: fJumpIfFalse,
 		opLessThan:    fLessThan,
 		opEquals:      fEquals,
+
+		opRelShift: fRelShift,
 
 		opHalt: fHalt,
 	} {
@@ -115,26 +122,31 @@ func (h *oper) fail(f string, args ...interface{}) {
 	h.err = fmt.Errorf("%s for instruction %d at %d", what, h.c.IC, h.inst)
 }
 
-func (h *oper) ptr(i int) *int {
-	if i < len(h.c.Mem) {
-		return &h.c.Mem[i]
+func (h *oper) peek(i int) int {
+	if i < 0 {
+		h.fail("Invalid memory access")
+		return 0
 	}
-
-	h.fail("Invalid memory access")
-	return &h.invalid
+	if i < len(h.c.Mem) {
+		return h.c.Mem[i]
+	}
+	return 0
 }
 
 func (h *oper) rarg(n int) int {
-	v := *h.ptr(h.c.IC + n)
+	v := h.peek(h.c.IC + n)
 
 	mode := digit(h.inst, n+1)
 	switch mode {
 
 	case modePosition:
-		return *h.ptr(v)
+		return h.peek(v)
 
 	case modeImmediate:
 		return v
+
+	case modeRelative:
+		return h.peek(h.c.RelBase + v)
 	}
 
 	h.fail("Invalid opcode mode %d", mode)
@@ -146,17 +158,36 @@ func (h *oper) warg(n int, val int) {
 		return
 	}
 
-	v := *h.ptr(h.c.IC + n)
+	addr := h.peek(h.c.IC + n)
 	mode := digit(h.inst, n+1)
 	switch mode {
 
 	case modePosition:
-		*h.ptr(v) = val
+		// pass
+
+	case modeImmediate:
+		h.fail("Invalid opcode mode %d", mode)
 		return
 
+	case modeRelative:
+		addr = h.c.RelBase + addr
 	}
 
-	h.fail("Invalid opcode mode %d", mode)
+	if addr < 0 {
+		h.fail("Invalid memory access", addr)
+	}
+
+	if addr > len(h.c.Mem) {
+		nsiz := len(h.c.Mem) * 3 / 2
+		if addr >= nsiz {
+			nsiz = addr + 1
+		}
+		x := make([]int, nsiz)
+		copy(x, h.c.Mem)
+		h.c.Mem = x
+	}
+
+	h.c.Mem[addr] = val
 }
 
 func (h *oper) finish(n int) error {
@@ -266,6 +297,12 @@ func fEquals(c *Comp, inst int) error {
 	h := oper{c: c, inst: inst}
 	h.warg(3, bool_int(h.rarg(1) == h.rarg(2)))
 	return h.finish(4)
+}
+
+func fRelShift(c *Comp, inst int) error {
+	h := oper{c: c, inst: inst}
+	h.c.RelBase += h.rarg(1)
+	return h.finish(2)
 }
 
 func bool_int(b bool) int {

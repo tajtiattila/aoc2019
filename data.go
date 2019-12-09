@@ -21,6 +21,14 @@ var (
 	IgnoreCache bool
 )
 
+func mustdaydataInts(day int) []int {
+	v, err := daydataInts(day)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return v
+}
+
 func daydataInts(day int) ([]int, error) {
 	rc, err := daydata(day)
 	if err != nil {

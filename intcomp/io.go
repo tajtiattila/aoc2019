@@ -63,3 +63,12 @@ func (o *logOutput) WriteInt(v int) error {
 	log.Printf("%s: %d", o.prefix, v)
 	return nil
 }
+
+type SliceOutput struct {
+	O []int
+}
+
+func (o *SliceOutput) WriteInt(v int) error {
+	o.O = append(o.O, v)
+	return nil
+}
