@@ -12,17 +12,6 @@ func day5() {
 		log.Fatal(err)
 	}
 
-	run := func(inp int, pfx string) {
-		c := intcomp.Comp{
-			Mem:    copyrom(rom),
-			Input:  intcomp.FixedInput(inp),
-			Output: intcomp.LogOutput(pfx),
-		}
-		if err := c.Run(); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	run(1, "day5a")
-	run(5, "day5b")
+	log.Println("day5a:", intcomp.MustRun(rom, 1))
+	log.Println("day5b:", intcomp.MustRun(rom, 5))
 }
