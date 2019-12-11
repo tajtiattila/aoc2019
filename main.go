@@ -38,6 +38,7 @@ func init() {
 	regd(8, day8)
 	regd(9, day9)
 	regd(10, day10)
+	regd(11, day11)
 }
 
 var regfn []func()
