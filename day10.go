@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"sort"
 	"strings"
 )
 
@@ -17,8 +18,14 @@ func day10() {
 		log.Fatal(err)
 	}
 
-	_, score := k.findbest()
+	c, score := k.findbest()
 	log.Println("day10a:", score)
+
+	z, ok := k.zap(c, 200)
+	if !ok {
+		log.Fatal("zap")
+	}
+	log.Println("day10b:", z.x*100+z.y)
 }
 
 type rat struct {
@@ -34,6 +41,10 @@ func findfracs(maxdenom int) []rat {
 			}
 		}
 	}
+	sort.Slice(v, func(i, j int) bool {
+		ir, jr := v[i], v[j]
+		return ir.num*jr.denom < jr.num*ir.denom
+	})
 	return v
 }
 
@@ -44,12 +55,44 @@ func gcd(a, b int) int {
 	return a
 }
 
+func dirfracs(m int) []point {
+	rv := findfracs(m)
+
+	var v []point
+	addp := func(q, a, b int) {
+		switch q {
+		case 0:
+			v = append(v, pt(a, -b))
+		case 1:
+			v = append(v, pt(b, a))
+		case 2:
+			v = append(v, pt(-a, b))
+		case 3:
+			v = append(v, pt(-b, -a))
+		}
+	}
+
+	for q := 0; q < 4; q++ {
+		addp(q, 0, 1)
+		for _, r := range rv {
+			addp(q, r.num, r.denom)
+		}
+		addp(q, 1, 1)
+		for i := len(rv) - 1; i >= 0; i-- {
+			r := rv[i]
+			addp(q, r.denom, r.num)
+		}
+	}
+
+	return v
+}
+
 type astchart struct {
 	dx, dy int
 
 	p []byte // dx*dy bytes
 
-	rays []rat
+	rays []point
 }
 
 func loadastchart(r io.Reader) (astchart, error) {
@@ -93,9 +136,24 @@ func loadastchart(r io.Reader) (astchart, error) {
 	if dy > m {
 		m = dy
 	}
-	rays := findfracs(m)
 
-	return astchart{dx: dx, dy: dy, p: p, rays: rays}, nil
+	return astchart{
+		dx:   dx,
+		dy:   dy,
+		p:    p,
+		rays: dirfracs(m),
+	}, nil
+}
+
+func (z astchart) copy() astchart {
+	p := make([]byte, len(z.p))
+	copy(p, z.p)
+	return astchart{
+		dx:   z.dx,
+		dy:   z.dy,
+		p:    p,
+		rays: z.rays,
+	}
 }
 
 func (z astchart) In(p point) bool {
@@ -132,39 +190,44 @@ func (k *astchart) findbest() (p point, score int) {
 func (k *astchart) nvis(p point) int {
 	n := 0
 
-	// check the 8 cardinal directions
-	for x := -1; x <= 1; x++ {
-		for y := -1; y <= 1; y++ {
-			if x != 0 || y != 0 {
-				n += k.nray(p, pt(x, y))
-			}
-		}
-	}
-
-	// check fraction directions
 	for _, r := range k.rays {
-		n += k.nray(p, pt(r.num, r.denom))
-		n += k.nray(p, pt(r.denom, r.num))
-		n += k.nray(p, pt(-r.num, r.denom))
-		n += k.nray(p, pt(-r.denom, r.num))
-		n += k.nray(p, pt(r.num, -r.denom))
-		n += k.nray(p, pt(r.denom, -r.num))
-		n += k.nray(p, pt(-r.num, -r.denom))
-		n += k.nray(p, pt(-r.denom, -r.num))
+		if _, ok := k.ray(p, r); ok {
+			n++
+		}
 	}
 
 	return n
 }
 
-func (k *astchart) nray(p, r point) int {
+func (k *astchart) ray(p, r point) (vis point, ok bool) {
 	p.x += r.x
 	p.y += r.y
 	for k.In(p) {
 		if k.At(p) != 0 {
-			return 1
+			return p, true
 		}
 		p.x += r.x
 		p.y += r.y
 	}
-	return 0
+	return p, false
+}
+
+func (k *astchart) zap(station point, nbet int) (p point, ok bool) {
+	n := 0
+	for {
+		zapped := false
+		for _, r := range k.rays {
+			p, ok := k.ray(station, r)
+			if ok {
+				n++
+				if n == nbet {
+					return p, true
+				}
+				zapped = true
+			}
+		}
+		if !zapped {
+			return station, false
+		}
+	}
 }

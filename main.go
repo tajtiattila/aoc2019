@@ -58,11 +58,11 @@ func parsearg(m map[int]struct{}, arg string) bool {
 	if strings.HasSuffix(arg, "+") {
 		a, aerr = strconv.Atoi(strings.TrimSuffix(arg, "+"))
 		b = len(regfn)
-	} else if i := strings.Index(arg, ".."); i != 0 {
+	} else if i := strings.Index(arg, ".."); i >= 0 {
 		a, aerr = strconv.Atoi(arg[:i])
 		b, berr = strconv.Atoi(arg[i+2:])
 	} else {
-		a, aerr = strconv.Atoi(arg[:i])
+		a, aerr = strconv.Atoi(arg)
 		b = a
 	}
 	if aerr != nil || berr != nil {
