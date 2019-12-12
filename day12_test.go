@@ -35,8 +35,7 @@ func TestJovian(t *testing.T) {
 			nchk:   10,
 			steps:  100,
 			energy: 1940,
-			//      4686774924, ???
-			repeat: 1466089482,
+			repeat: 4686774924,
 		},
 	}
 	for _, tt := range tests {

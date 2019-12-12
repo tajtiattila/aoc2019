@@ -143,8 +143,8 @@ type jov4 [8]int16
 func jov4c(k int, v []ob3) jov4 {
 	var j jov4
 	for i := range v {
-		j[i] = int16(v[i].p[k])
-		j[i+1] = int16(v[i].v[k])
+		j[2*i] = int16(v[i].p[k])
+		j[2*i+1] = int16(v[i].v[k])
 	}
 	return j
 }
@@ -167,7 +167,6 @@ func repjovian4(v []ob3) int64 {
 				continue
 			}
 			state := jov4c(k, w)
-			//fmt.Printf("[%d] %v\n", k, state)
 			if _, ok := seen[k][state]; ok {
 				m[k] = n
 				done++
@@ -178,7 +177,6 @@ func repjovian4(v []ob3) int64 {
 		n++
 	}
 
-	fmt.Println(m)
 	r := int64(1)
 	for _, v := range m {
 		r = lcm64(r, int64(v))
