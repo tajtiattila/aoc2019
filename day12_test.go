@@ -11,6 +11,7 @@ func TestJovian(t *testing.T) {
 		nchk   int
 		steps  int
 		energy int
+		repeat int64
 	}
 
 	tests := []test{
@@ -23,6 +24,7 @@ func TestJovian(t *testing.T) {
 			nchk:   1,
 			steps:  10,
 			energy: 179,
+			repeat: 2772,
 		},
 		{
 			src: `<x=-8, y=-10, z=0>
@@ -33,6 +35,8 @@ func TestJovian(t *testing.T) {
 			nchk:   10,
 			steps:  100,
 			energy: 1940,
+			//      4686774924, ???
+			repeat: 1466089482,
 		},
 	}
 	for _, tt := range tests {
@@ -40,23 +44,30 @@ func TestJovian(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		for _, o := range v {
+		w := make([]ob3, len(v))
+		copy(w, v)
+		for _, o := range w {
 			t.Log(o)
 		}
-		simjovian(v, tt.nchk)
+		simjovian(w, tt.nchk)
 		t.Logf("after %v steps", tt.nchk)
-		for _, o := range v {
+		for _, o := range w {
 			t.Log(o)
 		}
 
-		e := simjovian(v, tt.steps-tt.nchk)
+		e := simjovian(w, tt.steps-tt.nchk)
 		t.Logf("after %v steps", tt.steps)
-		for _, o := range v {
+		for _, o := range w {
 			t.Log(o)
 		}
 		t.Log(e, tt.energy)
 		if e != tt.energy {
 			t.Fail()
+		}
+
+		copy(w, v)
+		if r := repjovian(w); r != tt.repeat {
+			t.Fatalf("want repeat %v, got %v", tt.repeat, r)
 		}
 	}
 }
