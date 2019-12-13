@@ -72,3 +72,21 @@ func (o *SliceOutput) WriteInt(v int) error {
 	o.O = append(o.O, v)
 	return nil
 }
+
+func CallFuncOutput(f func(v []int) (int, error)) IntWriter {
+	return &callFuncOut{f: f}
+}
+
+type callFuncOut struct {
+	f func(v []int) (consumed int, err error)
+
+	v []int
+}
+
+func (o *callFuncOut) WriteInt(n int) error {
+	o.v = append(o.v, n)
+	n, err := o.f(o.v)
+	n = copy(o.v, o.v[n:])
+	o.v = o.v[:n]
+	return err
+}
