@@ -90,3 +90,9 @@ func (o *callFuncOut) WriteInt(n int) error {
 	o.v = o.v[:n]
 	return err
 }
+
+type IntReaderFunc func() (int, error)
+
+func (f IntReaderFunc) ReadInt() (int, error) {
+	return f()
+}
