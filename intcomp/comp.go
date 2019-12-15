@@ -1,6 +1,13 @@
 package intcomp
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+// PauseOutput is used as a return value from IntWriter
+// to pause a running program when output was written.
+var PauseOutput error = errors.New("pause on output")
 
 type Comp struct {
 	Mem []int // computer memory
@@ -20,6 +27,18 @@ func New(rom []int, in IntReader, out IntWriter) *Comp {
 		Mem:    ram,
 		Input:  in,
 		Output: out,
+	}
+}
+
+func (c *Comp) Fork(in IntReader, out IntWriter) *Comp {
+	ram := make([]int, len(c.Mem))
+	copy(ram, c.Mem)
+	return &Comp{
+		Mem:     ram,
+		Input:   in,
+		Output:  out,
+		IC:      c.IC,
+		RelBase: c.RelBase,
 	}
 }
 
@@ -270,11 +289,12 @@ func fOutput(c *Comp, inst int) error {
 		return h.err
 	}
 
-	if err := c.Output.WriteInt(v); err != nil {
-		return err
+	err := c.Output.WriteInt(v)
+	if err == nil || errors.Is(err, PauseOutput) {
+		c.IC += 2
 	}
 
-	return h.finish(2)
+	return err
 }
 
 func fJumpIfTrue(c *Comp, inst int) error {
