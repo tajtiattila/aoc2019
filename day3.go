@@ -73,6 +73,10 @@ func pt(x, y int) point {
 	return point{x, y}
 }
 
+func addpt(a, b point) point {
+	return pt(a.x+b.x, a.y+b.y)
+}
+
 type wiresegment struct {
 	vert   bool
 	u      int // y for horizontal, x for vertical
