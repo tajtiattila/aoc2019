@@ -196,7 +196,7 @@ func (h *oper) warg(n int, val int) {
 		h.fail("Invalid memory access", addr)
 	}
 
-	if addr > len(h.c.Mem) {
+	if addr >= len(h.c.Mem) {
 		nsiz := len(h.c.Mem) * 3 / 2
 		if addr >= nsiz {
 			nsiz = addr + 1
