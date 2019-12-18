@@ -84,6 +84,18 @@ func (m Map) Find(x byte) (p Point, ok bool) {
 	return Point{}, false
 }
 
+func (m Map) FindAll(x byte) []Point {
+	var all []Point
+	for i, b := range m.P {
+		if b == x {
+			x := i % m.Dx
+			y := i / m.Dx
+			all = append(all, Pt(x, y))
+		}
+	}
+	return all
+}
+
 func (m Map) FindKeys() []Point {
 	var keys []Point
 	for i, b := range m.P {
@@ -94,6 +106,35 @@ func (m Map) FindKeys() []Point {
 		}
 	}
 	return keys
+}
+
+func (m0 Map) FixStart() Map {
+	m := m0
+	m.P = make([]byte, len(m0.P))
+	copy(m.P, m0.P)
+
+	entrs := m.FindAll('@')
+	if len(entrs) != 1 {
+		return m
+	}
+
+	for _, entr := range entrs {
+		o := m.ofs(entr)
+		s := m.Dx
+
+		m.P[o-s-1] = '@'
+		m.P[o-s] = wall
+		m.P[o-s+1] = '@'
+
+		m.P[o-1] = wall
+		m.P[o] = wall
+		m.P[o+1] = wall
+
+		m.P[o+s-1] = '@'
+		m.P[o+s] = wall
+		m.P[o+s+1] = '@'
+	}
+	return m
 }
 
 var dirstep = []Point{
