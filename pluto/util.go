@@ -8,6 +8,7 @@ func ShortestPathLen(m *Map) int {
 	_, l := ShortestPath(m)
 	return l
 }
+
 func ShortestPath(m *Map) ([]Point, int) {
 	goalf := func(p astar.Point, d []astar.Step) []astar.Step {
 		steps := m.Steps(p.(Point))
@@ -34,14 +35,33 @@ func ShortestPath(m *Map) ([]Point, int) {
 	return path, cost
 }
 
-func manh(a, b Point) int {
-	dx := a.X - b.X
-	if dx < 0 {
-		dx = -dx
+func RecShortestPathLen(m *Map) int {
+	_, l := RecShortestPath(m)
+	return l
+}
+
+func RecShortestPath(m *Map) ([]RecPoint, int) {
+	goalf := func(p astar.Point, d []astar.Step) []astar.Step {
+		steps := m.RecSteps(p.(RecPoint))
+		for _, p := range steps {
+			l := 1 + p.Z
+			if p == m.RecGoal() {
+				l = 0
+			}
+			d = append(d, astar.Step{
+				P:    p,
+				Cost: 1,
+
+				EstimateLeft: l,
+			})
+		}
+		return d
 	}
-	dy := a.Y - b.Y
-	if dy < 0 {
-		dy = -dy
+
+	xpath, cost := astar.FindPath(m.RecStart(), goalf)
+	path := make([]RecPoint, len(xpath))
+	for i := range xpath {
+		path[i] = xpath[i].(RecPoint)
 	}
-	return dx + dy
+	return path, cost
 }

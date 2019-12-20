@@ -62,6 +62,57 @@ func (m *Map) Steps(at Point) []Point {
 	return dst
 }
 
+type RecPoint struct {
+	X, Y, Z int
+}
+
+func (r RecPoint) Pt() Point {
+	return Point{r.X, r.Y}
+}
+
+func addr(a RecPoint, b Point) RecPoint {
+	return RecPoint{a.X + b.X, a.Y + b.Y, a.Z}
+}
+
+func (m *Map) RecStart() RecPoint {
+	return RecPoint{m.start.X, m.start.Y, 0}
+}
+
+func (m *Map) RecGoal() RecPoint {
+	return RecPoint{m.goal.X, m.goal.Y, 0}
+}
+
+func (m *Map) warpDelta(p RecPoint) int {
+	outer := p.X == 2 || p.Y == 2 || p.X == m.Dx-3 || p.Y == m.Dy-3
+	if outer {
+		if p.Z == 0 {
+			return 0 // wall
+		}
+		return -1
+	} else {
+		return 1
+	}
+}
+
+func (m *Map) RecSteps(p RecPoint) []RecPoint {
+	if m.at(p.X, p.Y) != '.' {
+		return nil
+	}
+
+	var dst []RecPoint
+	for i, d := range dirs {
+		if next := addr(p, d); m.at(next.X, next.Y) == '.' {
+			dst = append(dst, next)
+		} else if pt, ok := m.warp[warp{p.Pt(), i}]; ok {
+			if d := m.warpDelta(p); d != 0 {
+				next := RecPoint{pt.X, pt.Y, p.Z + d}
+				dst = append(dst, next)
+			}
+		}
+	}
+	return dst
+}
+
 func Parse(r io.Reader) (*Map, error) {
 	var dx int
 	var lines [][]byte

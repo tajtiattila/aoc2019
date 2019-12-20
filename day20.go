@@ -16,4 +16,5 @@ func day20() {
 	}
 
 	log.Println("day20a:", pluto.ShortestPathLen(m))
+	log.Println("day20b:", pluto.RecShortestPathLen(m))
 }
