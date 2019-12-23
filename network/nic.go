@@ -41,6 +41,9 @@ func (nw *Network) Run(h func(Packet) bool) error {
 	}
 
 	nw.handler = h
+	defer func() {
+		nw.handler = nil
+	}()
 
 	nw.done = false
 	for !nw.done {
@@ -51,6 +54,28 @@ func (nw *Network) Run(h func(Packet) bool) error {
 	return nil
 }
 
+func (nw *Network) NAT() (int, error) {
+	var last Packet
+
+	nw.handler = func(p Packet) bool {
+		last = p
+		return true
+	}
+	defer func() {
+		nw.handler = nil
+	}()
+
+	for !nw.allIdle() {
+		if err := nw.Step(); err != nil {
+			return 0, err
+		}
+	}
+
+	last.Addr = 0
+	nw.send(last)
+	return last.Y, nil
+}
+
 func (nw *Network) Step() error {
 	for _, nic := range nw.nic {
 		if err := nic.c.Step(); err != nil {
@@ -58,6 +83,15 @@ func (nw *Network) Step() error {
 		}
 	}
 	return nil
+}
+
+func (nw *Network) allIdle() bool {
+	for _, nic := range nw.nic {
+		if !nic.idle {
+			return false
+		}
+	}
+	return true
 }
 
 func (nw *Network) send(p Packet) {
@@ -98,6 +132,8 @@ type NIC struct {
 	c *intcomp.Comp
 
 	queue []int
+
+	idle bool
 }
 
 func (nic *NIC) recv(p Packet) {
@@ -105,6 +141,7 @@ func (nic *NIC) recv(p Packet) {
 		panic("impossible")
 	}
 	nic.queue = append(nic.queue, p.X, p.Y)
+	nic.idle = false
 }
 
 type nicInput struct {
@@ -116,6 +153,7 @@ func (i *nicInput) ReadInt() (int, error) {
 
 	n := len(q)
 	if n == 0 {
+		i.nic.idle = true
 		return -1, nil
 	}
 

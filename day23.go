@@ -20,4 +20,19 @@ func day23() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	first := true
+	var lastv int
+	nw = network.New(rom, 50)
+	for {
+		v, err := nw.NAT()
+		if err != nil {
+			log.Fatal(err)
+		}
+		if !first && v == lastv {
+			break
+		}
+		first, lastv = false, v
+	}
+	log.Println("day23b:", lastv)
 }
