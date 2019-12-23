@@ -1,20 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 
+	"github.com/tajtiattila/aoc2019/input"
 	"github.com/tajtiattila/aoc2019/intcomp"
 )
 
 func day7() {
-	rom, err := daydataInts(7)
-	if err != nil {
-		log.Fatal(err)
-	}
+	rom := input.MustInts(7)
 
-	log.Println("day7a:", maxsig(rom, false))
-	log.Println("day7b:", maxsig(rom, true))
+	fmt.Println("7/1:", maxsig(rom, false))
+	fmt.Println("7/2:", maxsig(rom, true))
 }
 
 func maxsig(rom []int, feedback bool) int {

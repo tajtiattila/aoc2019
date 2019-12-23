@@ -1,18 +1,20 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
+	"github.com/tajtiattila/aoc2019/input"
 	"github.com/tajtiattila/aoc2019/network"
 )
 
 func day23() {
-	rom := mustdaydataInts(23)
+	rom := input.MustInts(23)
 
 	nw := network.New(rom, 50)
 	err := nw.Run(func(p network.Packet) bool {
 		if p.Addr == 255 {
-			log.Println("day23a:", p.Y)
+			fmt.Println("23/1:", p.Y)
 			return false
 		}
 		return true
@@ -34,5 +36,5 @@ func day23() {
 		}
 		first, lastv = false, v
 	}
-	log.Println("day23b:", lastv)
+	fmt.Println("23/2:", lastv)
 }

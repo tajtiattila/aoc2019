@@ -6,13 +6,14 @@ import (
 	"io"
 	"log"
 	"strings"
+
+	"github.com/tajtiattila/aoc2019/input"
 )
 
 func day6() {
-	rc := mustdaydata(6)
-	defer rc.Close()
+	r := input.MustReader(6)
 
-	m, err := parseOrbits(rc)
+	m, err := parseOrbits(r)
 	if err != nil {
 		log.Fatal("Parsing orbits:", err)
 	}
@@ -21,9 +22,9 @@ func day6() {
 	for _, b := range m {
 		na += b.depth()
 	}
-	log.Println("day6a:", na)
+	fmt.Println("6/1:", na)
 
-	log.Println("day6b:", orbitPathFind(m, "YOU", "SAN")-2)
+	fmt.Println("6/2:", orbitPathFind(m, "YOU", "SAN")-2)
 }
 
 func parseOrbits(r io.Reader) (map[string]*body, error) {

@@ -5,10 +5,27 @@ import (
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/tajtiattila/aoc2019/input"
 )
 
+var cli struct {
+	verbose bool
+}
+
 func main() {
+	flag.BoolVar(&cli.verbose, "v", false, "verbose mode")
+	clearCache := flag.Bool("cc", false, "clear cache")
+	flag.BoolVar(&input.IgnoreCache, "ic", false, "ignore cache")
 	flag.Parse()
+
+	input.ReportDownload = cli.verbose
+
+	if *clearCache {
+		if err := input.ClearCache(); err != nil {
+			log.Fatalln("clear cache:", err)
+		}
+	}
 
 	want := make(map[int]struct{})
 	for _, a := range flag.Args() {

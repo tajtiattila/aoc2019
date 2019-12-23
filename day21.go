@@ -6,15 +6,16 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/tajtiattila/aoc2019/input"
 	"github.com/tajtiattila/aoc2019/intcomp"
 )
 
 func day21() {
-	rom := mustdaydataInts(21)
+	rom := input.MustInts(21)
 
 	// (!A || !B || !C) && D
 	ra := r21(rom, "^aj ^bt |tj ^ct |tj &dj", "walk")
-	log.Println("day21a:", ra)
+	fmt.Println("21/1:", ra)
 
 	/*
 		t21(rom, "^aj ^ct |tj &dj", "run")
@@ -29,7 +30,7 @@ func day21() {
 	// @##.####.#..###
 	// ok: ^aj ^ct &ht |tj ^bt &ht |tj &dj
 	rb := r21(rom, "^aj ^ct &ht |tj ^bt &ht |tj &dj", "run")
-	log.Println("day21b:", rb)
+	fmt.Println("21/2:", rb)
 }
 
 func t21(rom []int, src, fin string) {

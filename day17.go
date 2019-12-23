@@ -1,14 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/tajtiattila/aoc2019/ascmap"
+	"github.com/tajtiattila/aoc2019/input"
 	"github.com/tajtiattila/aoc2019/intcomp"
 )
 
 func day17() {
-	rom := mustdaydataInts(17)
+	rom := input.MustInts(17)
 
 	img, err := intcomp.Run(rom)
 	if err != nil {
@@ -17,7 +19,7 @@ func day17() {
 
 	am := ascmap.FromInts(img)
 
-	log.Println("day17a:", am.AlignParam())
+	fmt.Println("17/1:", am.AlignParam())
 
 	rom[0] = 2
 	r, err := intcomp.Run(rom, am.Scafprog()...)
@@ -26,5 +28,5 @@ func day17() {
 	}
 	_, dust := ascmap.SplitOutput(r)
 
-	log.Println("day17b:", dust)
+	fmt.Println("17/2:", dust)
 }

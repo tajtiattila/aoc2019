@@ -4,18 +4,19 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/tajtiattila/aoc2019/input"
 	"github.com/tajtiattila/aoc2019/intcomp"
 )
 
 func day13() {
-	rom := mustdaydataInts(13)
+	rom := input.MustInts(13)
 
 	var ac arcabi
 	ca := intcomp.New(rom, ac.input(), intcomp.CallFuncOutput(ac.draw))
 	if err := ca.Run(); err != nil {
 		log.Fatal(err)
 	}
-	log.Println("13a:", ac.countTile(2))
+	fmt.Println("13/1:", ac.countTile(2))
 
 	rom[0] = 2
 	ac.tile = nil
@@ -23,7 +24,7 @@ func day13() {
 	if err := cb.Run(); err != nil {
 		log.Fatal(err)
 	}
-	log.Println("13b:", ac.score)
+	fmt.Println("13/2:", ac.score)
 }
 
 type arcabi struct {

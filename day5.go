@@ -1,17 +1,15 @@
 package main
 
 import (
-	"log"
+	"fmt"
 
+	"github.com/tajtiattila/aoc2019/input"
 	"github.com/tajtiattila/aoc2019/intcomp"
 )
 
 func day5() {
-	rom, err := daydataInts(5)
-	if err != nil {
-		log.Fatal(err)
-	}
+	rom := input.MustInts(5)
 
-	log.Println("day5a:", intcomp.MustRun(rom, 1))
-	log.Println("day5b:", intcomp.MustRun(rom, 5))
+	fmt.Println("5/1:", intcomp.MustRun(rom, 1))
+	fmt.Println("5/2:", intcomp.MustRun(rom, 5))
 }

@@ -3,17 +3,18 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"strings"
+
+	"github.com/tajtiattila/aoc2019/input"
 )
 
 func day16() {
-	src := strings.TrimSpace(mustdaydatastr(16))
+	src := strings.TrimSpace(input.MustString(16))
 
 	//phasemat(20)
 
-	log.Println("day16a:", phasesigN(src, 100)[:8])
-	log.Println("day16b:", phase100tenKmsg(src))
+	fmt.Println("16/1:", phasesigN(src, 100)[:8])
+	fmt.Println("16/2:", phase100tenKmsg(src))
 }
 
 func phasesigN(sig string, n int) string {

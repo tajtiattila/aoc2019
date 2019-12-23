@@ -6,17 +6,15 @@ import (
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/tajtiattila/aoc2019/input"
 )
 
 func day3() {
-	rc, err := daydata(3)
-	if err != nil {
-		log.Fatal("error getting data")
-	}
-	defer rc.Close()
+	r := input.MustReader(3)
 
 	var wires []wire
-	scanner := bufio.NewScanner(rc)
+	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		w, err := parsewire(0, 0, scanner.Text())
 		if err != nil {
@@ -41,8 +39,8 @@ func day3() {
 			id = d
 		}
 	}
-	log.Println("day3a:", im)
-	log.Println("day3b:", id)
+	fmt.Println("3/1:", im)
+	fmt.Println("3/2:", id)
 }
 
 func iabs(i int) int {

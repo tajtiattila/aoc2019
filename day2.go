@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+
+	"github.com/tajtiattila/aoc2019/input"
 )
 
 func copyrom(v []int) []int {
@@ -12,19 +14,16 @@ func copyrom(v []int) []int {
 }
 
 func day2() {
-	rom, err := daydataInts(2)
-	if err != nil {
-		log.Fatal(err)
-	}
+	rom := input.MustInts(2)
 
 	mem := copyrom(rom)
 	mem[1] = 12
 	mem[2] = 2
-	_, _, err = Intcomp(mem, 0)
+	_, _, err := Intcomp(mem, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("day2a:", mem[0])
+	fmt.Println("2/1:", mem[0])
 
 	const expect = 19690720
 	for noun := 0; noun <= 99; noun++ {
@@ -37,7 +36,7 @@ func day2() {
 				log.Fatal(err)
 			}
 			if expect == mem[0] {
-				log.Println("day2b:", noun*100+verb)
+				fmt.Println("2/2:", noun*100+verb)
 			}
 		}
 	}

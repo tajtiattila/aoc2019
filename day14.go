@@ -6,21 +6,22 @@ import (
 	"io"
 	"log"
 	"strings"
+
+	"github.com/tajtiattila/aoc2019/input"
 )
 
 func day14() {
-	rc := mustdaydata(14)
-	defer rc.Close()
+	r := input.MustReader(14)
 
-	m, err := parsefuelrecv(rc)
+	m, err := parsefuelrecv(r)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println("day14a:", fuelc(m, 1, "FUEL"))
+	fmt.Println("14/1:", fuelc(m, 1, "FUEL"))
 
 	const trillion = 1000000000000
-	log.Println("day14b:", fuelfromore(m, trillion))
+	fmt.Println("14/2:", fuelfromore(m, trillion))
 }
 
 type fuelctx struct {

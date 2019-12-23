@@ -7,24 +7,23 @@ import (
 	"log"
 	"math/bits"
 	"strings"
+
+	"github.com/tajtiattila/aoc2019/input"
 )
 
 func day24() {
-	rc := mustdaydata(24)
-	defer rc.Close()
+	r := input.MustReader(24)
 
-	bs, err := parsebugsim(rc)
+	bs, err := parsebugsim(r)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(bs)
-
 	state0 := bs.state
 
-	fmt.Println(bs.run1())
+	fmt.Println("24/1:", bs.run1())
 
-	fmt.Println(multibugsim(state0, 200))
+	fmt.Println("24/2:", multibugsim(state0, 200))
 }
 
 type bugsim struct {

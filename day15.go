@@ -1,24 +1,26 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
+	"github.com/tajtiattila/aoc2019/input"
 	"github.com/tajtiattila/aoc2019/intcomp"
 )
 
 func day15() {
-	rom := mustdaydataInts(15)
+	rom := input.MustInts(15)
 
 	start := agent15{c: intcomp.New(rom, nil, nil)}
 
 	var dest agent15 // oxigen
 
-	log.Println("day15a:", walk15(start, func(a agent15) bool {
+	fmt.Println("15/1:", walk15(start, func(a agent15) bool {
 		dest = a
 		return true
 	}))
 
-	log.Println("day15b:", walk15(dest, func(a agent15) bool {
+	fmt.Println("15/2:", walk15(dest, func(a agent15) bool {
 		return false
 	}))
 }

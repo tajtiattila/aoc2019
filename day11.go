@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/tajtiattila/aoc2019/input"
 	"github.com/tajtiattila/aoc2019/intcomp"
 )
 
 func day11() {
-	rom := mustdaydataInts(11)
+	rom := input.MustInts(11)
 
 	bot := new(paintbot)
 	c := intcomp.New(rom, bot, bot)
@@ -16,7 +17,7 @@ func day11() {
 		log.Fatal(err)
 	}
 
-	log.Println("day11a:", len(bot.hull))
+	fmt.Println("11/1:", len(bot.hull))
 
 	bot = new(paintbot)
 	bot.paint(1)
@@ -24,7 +25,7 @@ func day11() {
 	if err := c.Run(); err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("day11b:\n%s", bot.render())
+	fmt.Printf("11/2:\n%s", bot.render())
 }
 
 type paintbot struct {

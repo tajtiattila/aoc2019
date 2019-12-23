@@ -7,25 +7,26 @@ import (
 	"log"
 	"sort"
 	"strings"
+
+	"github.com/tajtiattila/aoc2019/input"
 )
 
 func day10() {
-	rc := mustdaydata(10)
-	defer rc.Close()
+	r := input.MustReader(10)
 
-	k, err := loadastchart(rc)
+	k, err := loadastchart(r)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	c, score := k.findbest()
-	log.Println("day10a:", score)
+	fmt.Println("10/1:", score)
 
 	z, ok := k.zap(c, 200)
 	if !ok {
 		log.Fatal("zap")
 	}
-	log.Println("day10b:", z.x*100+z.y)
+	fmt.Println("10/2:", z.x*100+z.y)
 }
 
 type rat struct {

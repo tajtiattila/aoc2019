@@ -1,12 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strings"
+
+	"github.com/tajtiattila/aoc2019/input"
 )
 
 func day8() {
-	im := spaceimage(mustdaydatastr(8), 25, 6)
+	im := spaceimage(input.MustString(8), 25, 6)
 
 	var n0min, n12 int
 	for i, layer := range im {
@@ -15,13 +18,13 @@ func day8() {
 			n0min, n12 = s[0], s[1]*s[2]
 		}
 	}
-	log.Println("day8a:", n12)
+	fmt.Println("8/1:", n12)
 
 	var m imagelayer
 	for _, layer := range im {
 		m.merge(layer)
 	}
-	log.Printf("day8b:\n%s", m)
+	fmt.Printf("8/2:\n%s", m)
 }
 
 type imagelayer struct {

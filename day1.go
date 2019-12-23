@@ -1,12 +1,13 @@
 package main
 
-import "log"
+import (
+	"fmt"
+
+	"github.com/tajtiattila/aoc2019/input"
+)
 
 func day1() {
-	ints, err := daydataInts(1)
-	if err != nil {
-		log.Fatal(err)
-	}
+	ints := input.MustInts(1)
 
 	sum1 := 0
 	sum2 := 0
@@ -15,8 +16,8 @@ func day1() {
 		sum2 += fuelx(n)
 	}
 
-	log.Println("day1a:", sum1)
-	log.Println("day1b:", sum2)
+	fmt.Println("1/1:", sum1)
+	fmt.Println("1/2:", sum2)
 }
 
 func fuel(n int) int {

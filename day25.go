@@ -6,11 +6,12 @@ import (
 	"io"
 	"strings"
 
+	"github.com/tajtiattila/aoc2019/input"
 	"github.com/tajtiattila/aoc2019/intcomp"
 )
 
 func day25() {
-	rom := mustdaydataInts(25)
+	rom := input.MustInts(25)
 
 	t := newtermio(rom)
 	t.ignoreitems = []string{"giant electromagnet", "infinite loop", "molten lava", "photons", "escape pod"}
@@ -18,7 +19,7 @@ func day25() {
 	//fmt.Println(t.inv)
 	t.run(t.secpath)
 	ok := t.shuffle(t.secdoor, t.inv...)
-	fmt.Printf("25:\n%s\n", t.result(ok))
+	fmt.Printf("25/1:\n%s\n", t.result(ok))
 }
 
 type termio struct {

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
+	"github.com/tajtiattila/aoc2019/input"
 	"github.com/tajtiattila/aoc2019/intcomp"
 )
 
@@ -18,9 +20,9 @@ func day19() {
 		}
 	}
 
-	log.Println("day19a:", n)
+	fmt.Println("19/1:", n)
 	x, y := beam.fitbox(100)
-	log.Println("day19b:", x*10000+y)
+	fmt.Println("19/2:", x*10000+y)
 }
 
 type span struct {
@@ -77,7 +79,7 @@ func (b *tracbeam) addline() {
 
 func (b *tracbeam) atprog(x, y int) bool {
 	if b.rom == nil {
-		b.rom = mustdaydataInts(19)
+		b.rom = input.MustInts(19)
 	}
 
 	v, err := intcomp.Run(b.rom, x, y)

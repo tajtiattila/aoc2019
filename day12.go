@@ -5,26 +5,24 @@ import (
 	"fmt"
 	"io"
 	"log"
+
+	"github.com/tajtiattila/aoc2019/input"
 )
 
 func day12() {
-	rc, err := daydata(12)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rc.Close()
+	r := input.MustReader(12)
 
-	v, err := scanjovian(rc)
+	v, err := scanjovian(r)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	w := make([]ob3, len(v))
 	copy(w, v)
-	log.Println("12a:", simjovian(w, 1000))
+	fmt.Println("12/1:", simjovian(w, 1000))
 
 	copy(w, v)
-	log.Println("12b:", repjovian(w))
+	fmt.Println("12/2:", repjovian(w))
 }
 
 type pt3 [3]int

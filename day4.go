@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
+
+	"github.com/tajtiattila/aoc2019/input"
 )
 
 func day4() {
 	var v []int
-	mustprocstr(mustdaydatastr(4), "-", 2, func(p string) error {
+	mustprocstr(input.MustString(4), "-", 2, func(p string) error {
 		n, err := strconv.Atoi(p)
 		v = append(v, n)
 		return err
@@ -24,8 +27,8 @@ func day4() {
 			b++
 		}
 	}
-	log.Println("day4a:", a)
-	log.Println("day4b:", b)
+	fmt.Println("4/1:", a)
+	fmt.Println("4/2:", b)
 }
 
 func pw4(pw, wantrun int) bool {
@@ -52,4 +55,18 @@ func pw4(pw, wantrun int) bool {
 	}
 	rundone()
 	return ok
+}
+
+func mustprocstr(s, sep string, nwant int, f func(string) error) {
+	parts := strings.Split(strings.TrimSpace(s), sep)
+	if len(parts) != nwant {
+		log.Fatalf("error processing %.100q (sep %q), want %d parts, got %d",
+			s, sep, nwant, len(parts))
+	}
+	for i, part := range parts {
+		if err := f(part); err != nil {
+			log.Fatalf("error processing %.100q (sep %q) at %d: %v",
+				s, sep, i, err)
+		}
+	}
 }

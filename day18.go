@@ -2,17 +2,18 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/tajtiattila/aoc2019/astar"
+	"github.com/tajtiattila/aoc2019/input"
 	"github.com/tajtiattila/aoc2019/rog"
 )
 
 func day18() {
-	rc := mustdaydata(18)
-	defer rc.Close()
+	r := input.MustReader(18)
 
-	m, err := rog.Parse(rc)
+	m, err := rog.Parse(r)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -22,14 +23,14 @@ func day18() {
 		log.Fatal(err)
 	}
 
-	log.Println("day18a", cost)
+	fmt.Println("18/1:", cost)
 
 	costb, err := day18b(m)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println("day18b", costb)
+	fmt.Println("18/2:", costb)
 }
 
 func day18a(m rog.Map) (int, error) {
