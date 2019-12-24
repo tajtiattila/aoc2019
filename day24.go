@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/bits"
 	"strings"
 )
 
@@ -18,7 +19,12 @@ func day24() {
 	}
 
 	fmt.Println(bs)
+
+	state0 := bs.state
+
 	fmt.Println(bs.run1())
+
+	fmt.Println(multibugsim(state0, 200))
 }
 
 type bugsim struct {
@@ -117,7 +123,7 @@ func parsebugsim(r io.Reader) (*bugsim, error) {
 			switch c {
 			case '#':
 				state |= uint64(1) << bit
-			case '.':
+			case '.', '?':
 				// pass
 			default:
 				return nil, fmt.Errorf("invalid rune %c", c)
@@ -137,4 +143,134 @@ func parsebugsim(r io.Reader) (*bugsim, error) {
 		dy:    dy,
 		state: state,
 	}, nil
+}
+
+func steprange(state []uint64) (min, max int) {
+	for i, v := range state {
+		if v != 0 {
+			min = i - 1
+			break
+		}
+	}
+
+	for i := min + 1; i < len(state); i++ {
+		v := state[i]
+		if v != 0 {
+			max = i + 1
+		}
+	}
+
+	return min, max
+}
+
+func multibugsim(state0 uint64, nsteps int) int {
+	sz := nsteps * 3
+	state := make([]uint64, sz)
+	tmp := make([]uint64, sz)
+	state[sz/2] = state0
+
+	for i := 0; i < nsteps; i++ {
+		multibugstep(state, tmp)
+		state, tmp = tmp, state
+	}
+
+	n := 0
+	for _, v := range state {
+		n += bits.OnesCount64(v)
+	}
+	return n
+}
+
+func multibugstep(state, nstate []uint64) {
+	imin, imax := steprange(state)
+	if imin == imax {
+		copy(nstate, state)
+		return
+	}
+
+	if imin < 1 || imax > len(state)-1 {
+		panic("overflow")
+	}
+
+	for i := range nstate {
+		if i < imin || i > imax {
+			nstate[i] = 0
+			continue
+		}
+
+		var s uint64
+		for bit, deltas := range bsdelta {
+			n := 0
+			for _, d := range deltas {
+				n += int((state[i+d.dlevel] >> d.bit) & 1)
+			}
+			if n == 1 || (n == 2 &&
+				((state[i]>>bit)&1) == 0) {
+				s |= (uint64(1) << bit)
+			}
+		}
+		nstate[i] = s
+	}
+}
+
+const bsdim = 5
+
+type bsdeltainf struct {
+	dlevel int
+	bit    int
+}
+
+var bsdelta [][]bsdeltainf
+
+func init() {
+	const mid = int(bsdim) / 2
+
+	addi := func(p, dlevel, pcond int) {
+		if len(bsdelta) != bsdim*bsdim {
+			bsdelta = make([][]bsdeltainf, bsdim*bsdim)
+		}
+		bsdelta[p] = append(bsdelta[p], bsdeltainf{dlevel: dlevel, bit: pcond})
+	}
+
+	add := func(x, y, dx, dy int) {
+		if x == mid && y == mid {
+			return
+		}
+
+		src := x + y*bsdim
+
+		nx, ny := x+dx, y+dy
+		if nx == mid && ny == mid {
+			// inner neighbor
+			var ofs, stride int
+			if dx == 0 {
+				ofs, stride = (mid-dy*2)*bsdim, 1
+			} else { // dy == 0
+				ofs, stride = mid-dx*2, bsdim
+			}
+			for i := 0; i < bsdim; i++ {
+				addi(src, 1, ofs)
+				ofs += stride
+			}
+			return
+		}
+
+		if nx < 0 || ny < 0 || nx >= bsdim || ny >= bsdim {
+			// outer neighbor
+			ox := mid + dx
+			oy := mid + dy
+			addi(src, -1, ox+oy*bsdim)
+			return
+		}
+
+		addi(src, 0, nx+ny*bsdim)
+	}
+
+	for y := 0; y < bsdim; y++ {
+		for x := 0; x < bsdim; x++ {
+			for _, d := range dirdelta {
+				add(x, y, d.x, d.y)
+			}
+		}
+	}
 }
